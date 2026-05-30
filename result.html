@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand Spark - 게임 결과</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <style>
+    /* ── 결과 화면 전용 스타일 ── */
+
+    .result-main {
+      display: flex;
+      flex-direction: column;
+      max-width: 500px;
+      margin: 0 auto; /* 가운데 정렬 */
+    }
+
+    /* 칭찬 메시지 섹션 */
+    .congrats-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    /* 이모지를 둥근 원 안에 표시 */
+    .emoji-circle {
+      display: inline-block;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #000000;
+    }
+
+    .congrats-title {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    /* 결과 카드 */
+    .result-card {
+      background-color: #ffffff;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 32px;
+    }
+
+    /* 정답 수 행 */
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .score-label {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .score-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    /* 통계 항목 목록 */
+    .stats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 개별 통계 항목 */
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background-color: #ffffff;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #000000;
+    }
+
+    .stat-item .material-symbols-outlined {
+      font-size: 32px;
+    }
+
+    .stat-label {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    /* 액션 버튼 2개 */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 다시 하기 버튼: 아래쪽 테두리로 입체감 표현 */
+    .btn-retry {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 70px;
+      background-color: #D32F2F;
+      color: #ffffff;
+      border: none;
+      border-bottom: 6px solid #9a2222;
+      border-radius: 8px;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s, border-bottom-width 0.1s;
+    }
+
+    .btn-retry:active {
+      transform: translateY(2px);
+      border-bottom-width: 2px; /* 눌린 느낌 */
+    }
+
+    /* 홈으로 버튼 */
+    .btn-home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 70px;
+      background-color: #ffffff;
+      color: #000000;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn-home:active {
+      transform: translateY(2px);
+      background-color: rgba(211, 47, 47, 0.1);
+      color: #D32F2F;
+      border-color: #D32F2F;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header class="page-header">
+    <div class="header-left">
+      <button class="icon-btn" onclick="history.back()">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <span class="header-title">Hand Spark</span>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">help</span>
+      </button>
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="page-main">
+    <div class="result-main">
+
+      <!-- 칭찬 메시지 -->
+      <section class="congrats-section">
+        <div class="emoji-circle">
+          <span style="font-size: 64px;">👍</span>
+        </div>
+        <h2 class="congrats-title">훌륭해요!<br>오늘 최고예요!</h2>
+      </section>
+
+      <!-- 결과 카드 -->
+      <div class="result-card">
+
+        <!-- 정답 수 -->
+        <div class="score-row">
+          <span class="score-label">정답 수</span>
+          <span class="score-value">
+            10문제 중 <span style="color: #D32F2F; text-decoration: underline;">8문제</span>
+          </span>
+        </div>
+
+        <!-- 통계 3가지 -->
+        <div class="stats-list">
+
+          <div class="stat-item">
+            <span class="material-symbols-outlined">task_alt</span>
+            <div>
+              <p class="stat-label">정답률</p>
+              <p class="stat-value">80%</p>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <span class="material-symbols-outlined">timer</span>
+            <div>
+              <p class="stat-label">평균 반응속도</p>
+              <p class="stat-value">3.2초</p>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <span class="material-symbols-outlined">schedule</span>
+            <div>
+              <p class="stat-label">소요 시간</p>
+              <p class="stat-value">1분 23초</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 버튼 2개 -->
+      <div class="action-buttons">
+        <button class="btn-retry" onclick="window.location.href='game.html'">
+          <span class="material-symbols-outlined" style="font-size: 32px;">refresh</span>
+          다시 하기
+        </button>
+        <button class="btn-home" onclick="window.location.href='home.html'">
+          <span class="material-symbols-outlined" style="font-size: 32px;">home</span>
+          홈으로
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 하단 네비게이션 -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="material-symbols-outlined">home</span>
+      <span class="nav-label">홈</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="material-symbols-outlined">exercise</span>
+      <span class="nav-label">레벨 선택</span>
+    </a>
+    <a href="result.html" class="nav-item active">
+      <span class="material-symbols-outlined icon-filled">analytics</span>
+      <span class="nav-label">기록</span>
+    </a>
+  </nav>
+
+  <script>
+    // 버튼 클릭 시 모바일 진동 피드백
+    document.querySelectorAll('button').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (window.navigator.vibrate) {
+          window.navigator.vibrate(20);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

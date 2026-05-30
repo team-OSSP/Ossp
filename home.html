@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand Spark - 홈</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <style>
+    /* ── 홈 전용 스타일 ── */
+
+    .home-main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px; /* 섹션 사이 간격 */
+    }
+
+    /* 앱 로고 & 제목 */
+    .logo-section {
+      text-align: center;
+    }
+
+    .app-title {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .app-subtitle {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    /* 히어로 이미지 박스 (로고 삽입 예정, 정사각형) */
+    .hero-box {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1 / 1;
+      background-color: #ffffff;
+      border: 4px solid #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-box img {
+      width: 256px;
+      height: 256px;
+      object-fit: contain;
+    }
+
+    /* 버튼 영역 */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    /* 날짜 카드 */
+    .date-card {
+      width: 100%;
+      max-width: 440px;
+      background-color: #ffffff;
+      border: 4px solid #000000;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .date-text {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .daily-message {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 -->
+  <header class="page-header">
+    <div class="header-left">
+      <span class="material-symbols-outlined" style="font-size: 30px;">waving_hand</span>
+      <span class="header-title">Hand Spark</span>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">help</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="page-main">
+    <div class="home-main">
+
+      <!-- 앱 제목 -->
+      <div class="logo-section">
+        <h1 class="app-title">Hand Spark</h1>
+        <p class="app-subtitle">손 모양을 따라해서 인지 건강을 지켜봐요.</p>
+      </div>
+
+      <!-- 히어로 이미지 -->
+      <!-- 이미지 자리: 나중에 핸드스파크 이미지 추가 -->
+      <div class="hero-box"></div>
+
+      <!-- 액션 버튼 2개 -->
+      <div class="action-buttons">
+        <button class="btn-red" onclick="window.location.href='level.html'">
+          <span class="material-symbols-outlined icon-filled" style="font-size: 36px;">play_circle</span>
+          게임 시작
+        </button>
+        <button class="btn-outline" onclick="window.location.href='result.html'">
+          <span class="material-symbols-outlined" style="font-size: 36px;">analytics</span>
+          내 기록 보기
+        </button>
+      </div>
+
+      <!-- 날짜 카드 -->
+      <div class="date-card">
+        <p class="date-text" id="current-date">날짜 로딩 중...</p>
+        <p class="daily-message">오늘도 뇌를 깨워봐요!</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 하단 네비게이션 -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item active">
+      <span class="material-symbols-outlined icon-filled">home</span>
+      <span class="nav-label">홈</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="material-symbols-outlined">exercise</span>
+      <span class="nav-label">레벨 선택</span>
+    </a>
+    <a href="result.html" class="nav-item">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="nav-label">기록</span>
+    </a>
+  </nav>
+
+  <script>
+    // 오늘 날짜 표시
+    var dateEl = document.getElementById('current-date');
+    var now = new Date();
+    var options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+    dateEl.textContent = now.toLocaleDateString('ko-KR', options);
+  </script>
+
+</body>
+</html>

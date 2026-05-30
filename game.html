@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand Spark - 게임 진행</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <style>
+    /* ── 게임 진행 전용 스타일 ── */
+
+    /* 게임 중에는 스크롤 없이 화면에 딱 맞게 */
+    body {
+      overflow: hidden;
+    }
+
+    /* 게임 메인: 헤더(70px) ~ 상태바(90px) 사이를 채움 */
+    .game-main {
+      position: fixed;
+      top: 70px;
+      bottom: 90px;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* 점수 표시 (헤더 오른쪽) */
+    .score-display {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    /* ── 타이머 섹션 ── */
+    .timer-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 16px;
+      background-color: #ffffff;
+      border: 2px solid #000000;
+    }
+
+    .timer-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .timer-emoji {
+      font-size: 36px;
+    }
+
+    .timer-text {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    /* 타이머 게이지 바 */
+    .timer-bar-wrap {
+      width: 100%;
+      max-width: 440px;
+      background-color: #d0d0d0;
+      height: 28px;
+      border: 2px solid #000000;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      background-color: #D32F2F;
+      width: 70%;
+      transition: width 1s linear; /* 1초마다 부드럽게 줄어듦 */
+    }
+
+    /* ── 미션 박스 ── */
+    .mission-box {
+      background-color: #ffffff;
+      border: 4px solid #D32F2F; /* 빨간 테두리로 강조 */
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mission-label {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .mission-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mission-emoji {
+      font-size: 56px;
+    }
+
+    .mission-text {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    /* ── 웹캠 피드 영역 ── */
+    .webcam-section {
+      position: relative;
+      flex-grow: 1; /* 남은 공간을 모두 차지 */
+      background-color: #000000;
+      border: 4px solid #000000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .webcam-placeholder {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 2;
+    }
+
+    /* ── 하단 상태바 ── */
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      background-color: #ffffff;
+      border-top: 4px solid #000000;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+    }
+
+    .status-content {
+      border: 2px solid #000000;
+      padding: 10px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-label {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .status-waiting {
+      font-size: 20px;
+      font-weight: 700;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 (점수 표시) -->
+  <header class="page-header">
+    <button class="icon-btn" onclick="window.location.href='level.html'">
+      <span class="material-symbols-outlined" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <span class="score-display">점수: 3/10</span>
+  </header>
+
+  <!-- 게임 메인 -->
+  <main class="game-main">
+
+    <!-- 타이머 -->
+    <section class="timer-section">
+      <div class="timer-display">
+        <span class="timer-emoji">⏱️</span>
+        <span class="timer-text">남은 시간: --초</span>
+      </div>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar-fill"></div>
+      </div>
+    </section>
+
+    <!-- 미션 -->
+    <section class="mission-box">
+      <span class="mission-label">이번 동작</span>
+      <div class="mission-content">
+        <span class="mission-emoji">👊</span>
+        <h2 class="mission-text">미션: 주먹 (왼손)</h2>
+      </div>
+    </section>
+
+    <!-- 웹캠 영역: MediaPipe Hands 연동 후 <video> + <canvas> 태그로 교체 예정 -->
+    <section class="webcam-section">
+      <p class="webcam-placeholder">📷<br>카메라 연결 전</p>
+    </section>
+
+  </main>
+
+  <!-- 하단 상태바 -->
+  <footer class="status-bar">
+    <div class="status-content">
+      <span class="status-label">인식 중:</span>
+      <span class="status-waiting">카메라 연결 대기 중...</span>
+    </div>
+  </footer>
+
+</body>
+</html>
