@@ -267,7 +267,7 @@
 
     <!-- 시작 버튼 -->
     <div class="start-section">
-      <button class="btn-start" onclick="window.location.href='game.html'">
+      <button class="btn-start" onclick="startGame()">
         시작하기
         <span class="material-symbols-outlined" style="font-size: 36px;">play_circle</span>
       </button>
@@ -292,8 +292,12 @@
   </nav>
 
   <script>
+    var selectedLevel = Number(localStorage.getItem('handSparkLevel')) || 2;
+
     // 카드 클릭 시 선택 표시 변경
     function selectLevel(selectedNum) {
+      selectedLevel = selectedNum;
+      localStorage.setItem('handSparkLevel', String(selectedNum));
       var cards = document.querySelectorAll('.level-card');
       cards.forEach(function(card, index) {
         if (index + 1 === selectedNum) {
@@ -303,6 +307,13 @@
         }
       });
     }
+
+    function startGame() {
+      localStorage.setItem('handSparkLevel', String(selectedLevel));
+      window.location.href = 'game.html?level=' + selectedLevel;
+    }
+
+    selectLevel(selectedLevel);
   </script>
 
 </body>
