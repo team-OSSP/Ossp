@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hand Spark - 게임 진행</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <style>
+    /* ── 게임 진행 전용 스타일 ── */
+
+    /* 게임 중에는 스크롤 없이 화면에 딱 맞게 */
+    body {
+      overflow: hidden;
+    }
+
+    /* 게임 메인: 헤더(70px) ~ 상태바(90px) 사이를 채움 */
+    .game-main {
+      position: fixed;
+      top: 70px;
+      bottom: 90px;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* 점수 표시 (헤더 오른쪽) */
+    .score-display {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    /* ── 타이머 섹션 ── */
+    .timer-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 16px;
+      background-color: #ffffff;
+      border: 2px solid #000000;
+    }
+
+    .timer-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .timer-emoji {
+      font-size: 36px;
+    }
+
+    .timer-text {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    /* 타이머 게이지 바 */
+    .timer-bar-wrap {
+      width: 100%;
+      max-width: 440px;
+      background-color: #d0d0d0;
+      height: 28px;
+      border: 2px solid #000000;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      background-color: #D32F2F;
+      width: 70%;
+      transition: width 1s linear; /* 1초마다 부드럽게 줄어듦 */
+    }
+
+    /* ── 미션 박스 ── */
+    .mission-box {
+      background-color: #ffffff;
+      border: 4px solid #D32F2F; /* 빨간 테두리로 강조 */
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mission-label {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .mission-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mission-emoji {
+      font-size: 56px;
+    }
+
+    .mission-text {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    /* ── 웹캠 피드 영역 ── */
+    .webcam-section {
+      position: relative;
+      flex-grow: 1; /* 남은 공간을 모두 차지 */
+      background-color: #000000;
+      border: 4px solid #000000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .webcam-placeholder {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 2;
+    }
+
+    .webcam-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .landmark-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+      pointer-events: none;
+    }
+
+    .game-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .game-action-btn {
+      height: 58px;
+      border: 2px solid #000000;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .game-action-btn.correct {
+      background-color: #D32F2F;
+      color: #ffffff;
+      border-color: #D32F2F;
+    }
+
+    .game-action-btn.skip {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    /* ── 하단 상태바 ── */
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      background-color: #ffffff;
+      border-top: 4px solid #000000;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+    }
+
+    .status-content {
+      border: 2px solid #000000;
+      padding: 10px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-label {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .status-waiting {
+      font-size: 20px;
+      font-weight: 700;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 (점수 표시) -->
+  <header class="page-header">
+    <button class="icon-btn" onclick="window.location.href='level.html'">
+      <span class="material-symbols-outlined" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <span class="score-display" id="score-display">점수: 0/0</span>
+  </header>
+
+  <!-- 게임 메인 -->
+  <main class="game-main">
+
+    <!-- 타이머 -->
+    <section class="timer-section">
+      <div class="timer-display">
+        <span class="timer-emoji">⏱️</span>
+        <span class="timer-text" id="timer-text">남은 시간: --초</span>
+      </div>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar-fill" id="timer-bar-fill"></div>
+      </div>
+    </section>
+
+    <!-- 미션 -->
+    <section class="mission-box">
+      <span class="mission-label" id="mission-label">이번 동작</span>
+      <div class="mission-content">
+        <span class="mission-emoji" id="mission-emoji">👊</span>
+        <h2 class="mission-text" id="mission-text">미션: 주먹</h2>
+      </div>
+    </section>
+
+    <section class="webcam-section">
+      <video class="webcam-video" id="webcam-video" autoplay playsinline muted hidden></video>
+      <canvas class="landmark-canvas" id="landmark-canvas"></canvas>
+      <p class="webcam-placeholder" id="webcam-placeholder">📷<br>카메라 연결 전</p>
+    </section>
+
+    <section class="game-actions">
+      <button class="game-action-btn correct" onclick="markMission(true)">동작했어요</button>
+      <button class="game-action-btn skip" onclick="markMission(false)">건너뛰기</button>
+    </section>
+
+  </main>
+
+  <!-- 하단 상태바 -->
+  <footer class="status-bar">
+    <div class="status-content">
+      <span class="status-label">인식 중:</span>
+      <span class="status-waiting" id="status-text">카메라 연결 대기 중...</span>
+    </div>
+  </footer>
+
+  <script>
+    var missionSets = {
+      1: [
+        { emoji: '👊', text: '주먹 만들기', gesture: 'fist' },
+        { emoji: '🖐️', text: '손바닥 펴기', gesture: 'open_palm' },
+        { emoji: '👍', text: '엄지척 만들기', gesture: 'thumbs_up' },
+        { emoji: '👌', text: 'OK 모양 만들기', gesture: 'ok' },
+        { emoji: '✌️', text: '브이 만들기', gesture: 'peace' }
+      ],
+      2: [
+        { emoji: '🤙', text: '전화 모양 만들기', gesture: 'call' },
+        { emoji: '🤟', text: '락사인 만들기', gesture: 'rock' },
+        { emoji: '👉', text: '손가락 총 만들기', gesture: 'point' },
+        { emoji: '☝️', text: '검지 들기', gesture: 'point' },
+        { emoji: '🫰', text: '손하트 만들기', gesture: 'finger_heart' }
+      ],
+      3: [
+        { emoji: '🙌', text: '양손 들어 올리기', gesture: 'two_hands' },
+        { emoji: '👊🖐️', text: '주먹 + 손바닥', gesture: 'fist_open' },
+        { emoji: '👍✌️', text: '엄지척 + 브이', gesture: 'thumbs_peace' },
+        { emoji: '👌☝️', text: 'OK + 검지 들기', gesture: 'ok_point' },
+        { emoji: '🫶', text: '양손 하트 만들기', gesture: 'two_hands' }
+      ]
+    };
+
+    var params = new URLSearchParams(window.location.search);
+    var level = Number(params.get('level')) || Number(localStorage.getItem('handSparkLevel')) || 2;
+    var missions = missionSets[level] || missionSets[2];
+    var currentIndex = 0;
+    var score = 0;
+    var roundSeconds = Math.max(5, 12 - level * 2);
+    var remainingSeconds = roundSeconds;
+    var timerId = null;
+    var startedAt = Date.now();
+    var reactionTimes = [];
+    var roundStartedAt = Date.now();
+    var handsModel = null;
+    var detectionActive = false;
+    var lastAutoMatchAt = 0;
+    var cameraStream = null;
+    var trackingLoopStarted = false;
+
+    var scoreDisplay = document.getElementById('score-display');
+    var timerText = document.getElementById('timer-text');
+    var timerBarFill = document.getElementById('timer-bar-fill');
+    var missionLabel = document.getElementById('mission-label');
+    var missionEmoji = document.getElementById('mission-emoji');
+    var missionText = document.getElementById('mission-text');
+    var statusText = document.getElementById('status-text');
+    var video = document.getElementById('webcam-video');
+    var placeholder = document.getElementById('webcam-placeholder');
+    var canvas = document.getElementById('landmark-canvas');
+    var canvasContext = canvas.getContext('2d');
+
+    function renderMission() {
+      var mission = missions[currentIndex];
+      remainingSeconds = roundSeconds;
+      roundStartedAt = Date.now();
+      scoreDisplay.textContent = '점수: ' + score + '/' + missions.length;
+      missionLabel.textContent = '이번 동작 ' + (currentIndex + 1) + '/' + missions.length;
+      missionEmoji.textContent = mission.emoji;
+      missionText.textContent = '미션: ' + mission.text;
+      updateTimer();
+    }
+
+    function updateTimer() {
+      timerText.textContent = '남은 시간: ' + remainingSeconds + '초';
+      timerBarFill.style.width = (remainingSeconds / roundSeconds * 100) + '%';
+    }
+
+    function startTimer() {
+      clearInterval(timerId);
+      timerId = setInterval(function() {
+        remainingSeconds -= 1;
+        updateTimer();
+        if (remainingSeconds <= 0) {
+          markMission(false);
+        }
+      }, 1000);
+    }
+
+    function markMission(isCorrect) {
+      if (currentIndex >= missions.length) {
+        return;
+      }
+
+      if (isCorrect) {
+        score += 1;
+        reactionTimes.push((Date.now() - roundStartedAt) / 1000);
+      }
+
+      currentIndex += 1;
+      if (currentIndex >= missions.length) {
+        finishGame();
+        return;
+      }
+
+      renderMission();
+      startTimer();
+    }
+
+    function finishGame() {
+      clearInterval(timerId);
+      detectionActive = false;
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(function(track) {
+          track.stop();
+        });
+      }
+      var elapsedSeconds = Math.round((Date.now() - startedAt) / 1000);
+      var avgReaction = reactionTimes.length
+        ? reactionTimes.reduce(function(total, value) { return total + value; }, 0) / reactionTimes.length
+        : 0;
+      var result = {
+        level: level,
+        total: missions.length,
+        correct: score,
+        elapsedSeconds: elapsedSeconds,
+        averageReaction: avgReaction,
+        finishedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('handSparkLastResult', JSON.stringify(result));
+      window.location.href = 'result.html';
+    }
+
+    function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusText.textContent = '이 브라우저는 카메라를 지원하지 않아요.';
+        return;
+      }
+
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+          video.srcObject = stream;
+          cameraStream = stream;
+          video.hidden = false;
+          placeholder.hidden = true;
+          statusText.textContent = '카메라 연결됨. 손 인식 준비 중...';
+          initHandTracking();
+        })
+        .catch(function() {
+          statusText.textContent = '카메라 권한이 없어서 수동 진행 모드입니다.';
+        });
+    }
+
+    function initHandTracking() {
+      if (!window.Hands) {
+        statusText.textContent = '손 인식 라이브러리를 불러오지 못해 수동 진행 모드입니다.';
+        return;
+      }
+
+      handsModel = new Hands({
+        locateFile: function(file) {
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + file;
+        }
+      });
+      handsModel.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.65,
+        minTrackingConfidence: 0.65
+      });
+      handsModel.onResults(handleHandResults);
+      detectionActive = true;
+      video.addEventListener('loadeddata', startHandLoop);
+      if (video.readyState >= 2) {
+        startHandLoop();
+      }
+      statusText.textContent = '손 인식 중. 동작이 맞으면 자동으로 넘어갑니다.';
+    }
+
+    function startHandLoop() {
+      if (trackingLoopStarted) {
+        return;
+      }
+      trackingLoopStarted = true;
+      detectHands();
+    }
+
+    function detectHands() {
+      if (!detectionActive || !handsModel || video.readyState < 2) {
+        if (detectionActive) {
+          requestAnimationFrame(detectHands);
+        }
+        return;
+      }
+
+      handsModel.send({ image: video })
+        .catch(function() {
+          statusText.textContent = '손 인식 처리 중 오류가 있어 수동 버튼도 사용할 수 있어요.';
+        })
+        .finally(function() {
+          if (detectionActive) {
+            requestAnimationFrame(detectHands);
+          }
+        });
+    }
+
+    function handleHandResults(results) {
+      drawLandmarks(results.multiHandLandmarks || []);
+      var gestures = (results.multiHandLandmarks || []).map(classifyHand);
+      var expected = missions[currentIndex] && missions[currentIndex].gesture;
+
+      if (!gestures.length) {
+        statusText.textContent = '손을 화면 안에 보여주세요.';
+        return;
+      }
+
+      var recognizedText = gestures.join(', ');
+      statusText.textContent = '인식: ' + recognizedText;
+
+      if (expected && isExpectedGesture(expected, gestures) && Date.now() - lastAutoMatchAt > 1200) {
+        lastAutoMatchAt = Date.now();
+        statusText.textContent = '정답 인식!';
+        markMission(true);
+      }
+    }
+
+    function drawLandmarks(hands) {
+      var width = canvas.clientWidth;
+      var height = canvas.clientHeight;
+      if (!width || !height) {
+        return;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvasContext.clearRect(0, 0, width, height);
+      canvasContext.fillStyle = '#D32F2F';
+      canvasContext.strokeStyle = '#ffffff';
+      canvasContext.lineWidth = 2;
+
+      hands.forEach(function(landmarks) {
+        landmarks.forEach(function(point) {
+          var x = point.x * width;
+          var y = point.y * height;
+          canvasContext.beginPath();
+          canvasContext.arc(x, y, 5, 0, Math.PI * 2);
+          canvasContext.fill();
+          canvasContext.stroke();
+        });
+      });
+    }
+
+    function classifyHand(points) {
+      var index = isFingerExtended(points, 8, 6);
+      var middle = isFingerExtended(points, 12, 10);
+      var ring = isFingerExtended(points, 16, 14);
+      var pinky = isFingerExtended(points, 20, 18);
+      var thumb = isThumbOpen(points);
+      var extendedCount = [index, middle, ring, pinky].filter(Boolean).length;
+      var thumbIndexDistance = distance(points[4], points[8]);
+      var palmSize = distance(points[0], points[9]) || 0.1;
+
+      if (!thumb && extendedCount === 0) return 'fist';
+      if (thumb && !index && !middle && !ring && !pinky) return 'thumbs_up';
+      if (extendedCount === 4) return 'open_palm';
+      if (thumbIndexDistance < palmSize * 0.45 && middle && ring && pinky) return 'ok';
+      if (index && middle && !ring && !pinky) return 'peace';
+      if (thumb && pinky && !index && !middle && !ring) return 'call';
+      if (index && pinky && !middle && !ring) return 'rock';
+      if (index && !middle && !ring && !pinky) return 'point';
+      if (thumbIndexDistance < palmSize * 0.5 && index) return 'finger_heart';
+      return 'unknown';
+    }
+
+    function isFingerExtended(points, tipIndex, pipIndex) {
+      return points[tipIndex].y < points[pipIndex].y - 0.025;
+    }
+
+    function isThumbOpen(points) {
+      return distance(points[4], points[9]) > distance(points[3], points[9]) * 1.25;
+    }
+
+    function distance(a, b) {
+      var dx = a.x - b.x;
+      var dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function isExpectedGesture(expected, gestures) {
+      if (expected === 'two_hands') {
+        return gestures.length >= 2;
+      }
+      if (expected === 'fist_open') {
+        return gestures.includes('fist') && gestures.includes('open_palm');
+      }
+      if (expected === 'thumbs_peace') {
+        return gestures.includes('thumbs_up') && gestures.includes('peace');
+      }
+      if (expected === 'ok_point') {
+        return gestures.includes('ok') && gestures.includes('point');
+      }
+      return gestures.includes(expected);
+    }
+
+    renderMission();
+    startTimer();
+    startCamera();
+  </script>
+
+</body>
+</html>

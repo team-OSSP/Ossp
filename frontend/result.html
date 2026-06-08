@@ -191,7 +191,7 @@
         <div class="emoji-circle">
           <span style="font-size: 64px;">👍</span>
         </div>
-        <h2 class="congrats-title">훌륭해요!<br>오늘 최고예요!</h2>
+        <h2 class="congrats-title" id="congrats-title">훌륭해요!<br>오늘 최고예요!</h2>
       </section>
 
       <!-- 결과 카드 -->
@@ -200,8 +200,8 @@
         <!-- 정답 수 -->
         <div class="score-row">
           <span class="score-label">정답 수</span>
-          <span class="score-value">
-            10문제 중 <span style="color: #D32F2F; text-decoration: underline;">8문제</span>
+          <span class="score-value" id="score-summary">
+            0문제 중 <span style="color: #D32F2F; text-decoration: underline;">0문제</span>
           </span>
         </div>
 
@@ -212,7 +212,7 @@
             <span class="material-symbols-outlined">task_alt</span>
             <div>
               <p class="stat-label">정답률</p>
-              <p class="stat-value">80%</p>
+              <p class="stat-value" id="accuracy-value">0%</p>
             </div>
           </div>
 
@@ -220,7 +220,7 @@
             <span class="material-symbols-outlined">timer</span>
             <div>
               <p class="stat-label">평균 반응속도</p>
-              <p class="stat-value">3.2초</p>
+              <p class="stat-value" id="reaction-value">0초</p>
             </div>
           </div>
 
@@ -228,7 +228,7 @@
             <span class="material-symbols-outlined">schedule</span>
             <div>
               <p class="stat-label">소요 시간</p>
-              <p class="stat-value">1분 23초</p>
+              <p class="stat-value" id="elapsed-value">0초</p>
             </div>
           </div>
 
@@ -267,6 +267,43 @@
   </nav>
 
   <script>
+    function readLastResult() {
+      try {
+        return JSON.parse(localStorage.getItem('handSparkLastResult'));
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function formatElapsed(seconds) {
+      var safeSeconds = Math.max(0, Number(seconds) || 0);
+      var minutes = Math.floor(safeSeconds / 60);
+      var rest = safeSeconds % 60;
+      if (minutes > 0) {
+        return minutes + '분 ' + rest + '초';
+      }
+      return rest + '초';
+    }
+
+    var result = readLastResult() || {
+      total: 0,
+      correct: 0,
+      averageReaction: 0,
+      elapsedSeconds: 0
+    };
+    var total = Number(result.total) || 0;
+    var correct = Number(result.correct) || 0;
+    var accuracy = total ? Math.round(correct / total * 100) : 0;
+
+    document.getElementById('score-summary').innerHTML =
+      total + '문제 중 <span style="color: #D32F2F; text-decoration: underline;">' + correct + '문제</span>';
+    document.getElementById('accuracy-value').textContent = accuracy + '%';
+    document.getElementById('reaction-value').textContent =
+      result.averageReaction ? Number(result.averageReaction).toFixed(1) + '초' : '-';
+    document.getElementById('elapsed-value').textContent = formatElapsed(result.elapsedSeconds);
+    document.getElementById('congrats-title').innerHTML =
+      total ? '훌륭해요!<br>오늘 최고예요!' : '아직 기록이 없어요.<br>게임을 먼저 해볼까요?';
+
     // 버튼 클릭 시 모바일 진동 피드백
     document.querySelectorAll('button').forEach(function(btn) {
       btn.addEventListener('click', function() {
