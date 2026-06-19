@@ -58,7 +58,7 @@ Ossp/
 │
 ├── datasets/
 │   ├── dataset.yaml                  # HaGRID YOLO 8클래스 정의
-│   └── OSSP-Labeling.coco (1).zip    # 자체 수집 라벨링 데이터 (COCO)
+│   └── OSSP-Labeling-coco.zip    # 자체 수집 라벨링 데이터 (COCO)
 │
 └── prepare/
     └── prepare_hagrid_dataset.py     # HaGRID 다운로드·전처리 스크립트
@@ -108,7 +108,7 @@ Ossp/
 | **stage1** | HaGRID (8클래스) | palm·fist·ok·three·like·call·rock·three2 | `model/hagrid_stage1_8cls_best.pt` |
 | **stage2** | HaGRID + 자체 수집(동양인·고령층) | 동일 | `train/hagrid_stage2_elderly_best.pt` |
 
-- **데이터셋**: HaGRID(`datasets/dataset.yaml`) + 자체 수집 데이터를 Roboflow로 라벨링(`datasets/OSSP-Labeling.coco (1).zip`)
+- **데이터셋**: HaGRID(`datasets/dataset.yaml`) + 자체 수집 데이터를 Roboflow로 라벨링(`datasets/OSSP-Labeling-coco.zip`)
 - **전처리**: `prepare/prepare_hagrid_dataset.py` (HaGRID 다운로드·YOLO 포맷 변환)
 - **학습/내보내기**: `train/`의 노트북에서 학습, `model/export_yolov10_onnx.ipynb`에서 `.pt → .onnx` 변환
 - **비교 실험(ablation)**: HaGRID 단독(stage1) vs 자체 데이터 추가(stage2)로 고령층·동양인 손에 대한 인식 성능을 비교합니다.
