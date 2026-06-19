@@ -2,10 +2,10 @@ const gestureInfo = {
   palm:   { emoji: "🖐️", text: "손바닥 펴기",      gesture: "open_palm"  },
   fist:   { emoji: "👊",  text: "주먹 만들기",       gesture: "fist"       },
   like:   { emoji: "👍",  text: "엄지척 만들기",     gesture: "thumbs_up"  },
-  three:  { emoji: "",    text: "검지, 중지, 약지를 펼쳐서 숫자 3을 만드세요.", gesture: "three" },
+  three:  { emoji: "3️⃣",  text: "검지, 중지, 약지를 펼쳐서 숫자 3을 만드세요.", gesture: "three" },
   ok:     { emoji: "👌",  text: "OK 모양 만들기",    gesture: "ok"         },
   rock:   { emoji: "🤟",  text: "락사인 만들기",     gesture: "rock"       },
-  three2: { emoji: "",    text: "엄지, 검지, 중지를 펼쳐서 숫자 3을 만드세요.", gesture: "three2" },
+  three2: { emoji: "3️⃣",  text: "엄지, 검지, 중지를 펼쳐서 숫자 3을 만드세요.", gesture: "three2" },
   call:   { emoji: "🤙",  text: "전화 모양 만들기",  gesture: "call"       },
 };
 
