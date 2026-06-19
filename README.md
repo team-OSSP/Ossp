@@ -1,161 +1,156 @@
-# Hand Spark 👋✨
+# HandSpark 👋✨ — AI 손 제스처 인지훈련 게임
 
-> 손 모양을 따라 만들며 인지 건강을 지키는 **시니어 친화 손 제스처 게임**
+> 웹캠 앞에서 손 모양을 따라 만들며 인지 건강을 지키는 **시니어 친화 손 제스처 게임**입니다.
+> 화면이 제시하는 손 모양(주먹, 손바닥, OK, 전화 모양 등)을 따라 하면 손을 인식해 자동으로 정답을 판정하고,
+> 정답률·반응속도·소요 시간을 기록해 인지 훈련을 돕습니다.
 
-웹캠 앞에서 화면이 제시하는 손 모양(주먹, 손바닥, OK, 브이 등)을 따라 하면,
-**MediaPipe Hands**가 손 관절을 인식해 자동으로 정답을 판정합니다.
-큰 글씨 · 고대비 · 단순한 흐름으로 디자인해 어르신도 쉽게 사용할 수 있도록 만들었습니다.
-
----
-
-## 📑 목차
-- [주요 기능](#-주요-기능)
-- [화면 구성](#-화면-구성)
-- [동작 흐름](#-동작-흐름)
-- [기술 스택](#-기술-스택)
-- [프로젝트 구조](#-프로젝트-구조)
-- [시작하기](#-시작하기)
-- [게임 방법](#-게임-방법)
-- [손동작 인식 원리](#-손동작-인식-원리)
-- [데이터 저장](#-데이터-저장)
-- [요구 사항 · 주의점](#-요구-사항--주의점)
-- [향후 계획](#-향후-계획)
+고령화 사회에서 **치매 예방·경도인지장애(MCI) 관리**를 위한 손가락 인지 훈련을, 별도 장비 없이 카메라만으로 가정에서도 할 수 있도록 만드는 것이 목표입니다.
 
 ---
 
-## ✨ 주요 기능
+## 📌 한눈에 보기
 
-- **실시간 손 제스처 인식** — 웹캠 영상에서 손 관절(랜드마크) 21개를 추출해 손 모양을 판별
-- **난이도 3단계** — 한 손 기초 → 한 손 심화 → 양손 조합
-- **자동 정답 판정** — 미션과 일치하는 손 모양이 잡히면 자동으로 다음 문제로 진행
-- **수동 진행 모드** — 카메라 권한이 없거나 인식이 어려우면 버튼으로도 진행 가능 (접근성 보장)
-- **기록 통계** — 정답률 · 평균 반응속도 · 소요 시간을 게임 종료 후 시각화
-- **시니어 친화 UI** — 큰 폰트, 굵은 검정 테두리, 빨강(`#D32F2F`) 강조, 하단 고정 내비게이션
-- **모바일 대응** — 반응형 레이아웃 + 버튼 진동(haptic) 피드백
-
----
-
-## 🖥 화면 구성
-
-| 페이지 | 파일 | 설명 |
-| --- | --- | --- |
-| 홈 | `home.html` | 앱 소개, 오늘 날짜, `게임 시작` · `내 기록 보기` 버튼 |
-| 레벨 선택 | `level.html` | Lv.1~Lv.3 카드 선택, 선택값을 `localStorage`에 저장 |
-| 게임 진행 | `game.html` | 웹캠 + 미션 + 타이머 + 손 인식, 핵심 로직이 담긴 화면 |
-| 결과 | `result.html` | 정답 수 · 정답률 · 평균 반응속도 · 소요 시간 요약 |
-
----
-
-## 🔁 동작 흐름
-
-```mermaid
-flowchart LR
-    A[home.html<br/>홈] --> B[level.html<br/>레벨 선택]
-    B --> C[game.html<br/>게임 진행]
-    C --> D[result.html<br/>결과]
-    D -->|다시 하기| C
-    D -->|홈으로| A
-```
-
-게임 화면(`game.html`) 내부의 인식 루프는 다음과 같이 동작합니다.
-
-```mermaid
-flowchart LR
-    W[웹캠 입력<br/>getUserMedia] --> M[MediaPipe Hands<br/>손 관절 21개 추출]
-    M --> L[캔버스에 랜드마크 표시]
-    M --> G[규칙 기반 제스처 분류]
-    G --> J{미션과 일치?}
-    J -->|예| N[정답 처리 → 다음 미션]
-    J -->|아니오| W
-```
-
----
-
-## 🛠 기술 스택
-
-- **HTML5 / CSS3 / Vanilla JavaScript** — 프레임워크·번들러 없이 순수 웹 표준으로 구현
-- **[MediaPipe Hands](https://developers.google.com/mediapipe)** — 손 관절 랜드마크 추정 (jsDelivr CDN)
-- **WebRTC `getUserMedia`** — 웹캠 영상 입력
-- **Canvas 2D** — 실시간 랜드마크 시각화
-- **Web Storage (`localStorage`)** — 선택 레벨·최근 기록 저장
-- **Google Fonts** — Noto Sans, Material Symbols Outlined
-
-> 별도의 서버나 빌드 과정이 없습니다. 정적 파일만으로 동작합니다.
+- **두 가지 프론트엔드**
+  - `frontend/` — HTML/CSS/Vanilla JS 프로토타입 (MediaPipe 규칙 기반 인식)
+  - `frontend-react/` — React(Vite) 버전 + **YOLOv10n 모델 통합**(하이브리드 인식)
+- **손 제스처 인식 모델 (YOLOv10n)**
+  - `stage1` — HaGRID 8개 클래스 학습본
+  - `stage2` — 자체 수집 **동양인·고령층 데이터**를 추가한 학습본 (성능 비교용)
+- **학습·전처리 파이프라인** — `train/`, `prepare/`, `datasets/`
 
 ---
 
 ## 📂 프로젝트 구조
 
 ```
-Ossp-main/
-└── frontend/
-    ├── home.html      # 홈 화면
-    ├── level.html     # 레벨 선택
-    ├── game.html      # 게임 진행 (웹캠 + 손 인식)
-    ├── result.html    # 결과 통계
-    └── style.css      # 공통 스타일 (헤더·내비·버튼·타이포)
+Ossp/
+├── frontend/                     # 바닐라 JS 프로토타입
+│   ├── home.html                 # 홈
+│   ├── level.html                # 레벨 선택
+│   ├── game.html                 # 게임 진행 (웹캠 + 손 인식)
+│   ├── result.html               # 결과 통계
+│   └── style.css                 # 공통 스타일
+│
+├── frontend-react/               # React(Vite) 버전 + YOLO 통합
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── public/
+│   │   └── hagrid_stage1_8cls.onnx   # 브라우저 추론용 stage1 모델
+│   └── src/
+│       ├── App.jsx                   # 라우팅 (/, /level, /game, /result)
+│       ├── pages/                    # Home · Level · Game · Result
+│       ├── components/Layout.jsx     # 헤더 · 하단 내비
+│       ├── hooks/useMediaPipeHands.js # 웹캠 + MediaPipe 생명주기
+│       ├── lib/gestures.js           # 규칙 기반 제스처 분류
+│       ├── lib/yolo.js               # onnxruntime-web YOLO 추론
+│       └── data/missions.js          # 레벨별 미션 데이터
+│
+├── model/                        # 배포용 모델
+│   ├── hagrid_stage1_8cls_best.pt    # stage1 학습 가중치
+│   └── export_yolov10_onnx.ipynb     # .pt → .onnx 변환 노트북
+│
+├── train/                        # 학습 노트북 + 가중치
+│   ├── train_yolov10_stage1.ipynb
+│   ├── train_yolov10_HaGRID_8cls.ipynb
+│   ├── train_yolov10_stage2_elderly_*.ipynb
+│   └── hagrid_stage2_elderly_best.pt # stage2 (고령층 데이터 포함)
+│
+├── datasets/
+│   ├── dataset.yaml                  # HaGRID YOLO 8클래스 정의
+│   └── OSSP-Labeling.coco (1).zip    # 자체 수집 라벨링 데이터 (COCO)
+│
+└── prepare/
+    └── prepare_hagrid_dataset.py     # HaGRID 다운로드·전처리 스크립트
 ```
-
----
-
-## 🚀 시작하기
-
-손 인식을 위한 카메라(`getUserMedia`)는 **보안 컨텍스트(localhost 또는 HTTPS)** 에서만 동작합니다.
-`home.html`을 파일로 바로 열면(`file://`) 카메라가 차단될 수 있으니, 아래처럼 로컬 서버로 실행하세요.
-
-```bash
-# 저장소 클론
-git clone <repository-url>
-cd Ossp-main/frontend
-
-# 로컬 서버 실행 (둘 중 하나)
-python -m http.server 8000
-# 또는
-npx serve
-```
-
-브라우저에서 접속:
-
-```
-http://localhost:8000/home.html
-```
-
-처음 게임을 시작하면 **카메라 권한 허용**을 묻습니다. 허용하면 손 인식이 켜집니다.
 
 ---
 
 ## 🎮 게임 방법
 
-1. 홈에서 **게임 시작** → 레벨을 고릅니다. (기본값 Lv.2)
+1. 홈에서 **게임 시작** → 레벨 선택 (기본값 Lv.2)
 2. 화면 상단의 **미션 손 모양**을 웹캠 앞에서 따라 만듭니다.
-3. 손 모양이 인식되면 **자동으로 다음 문제**로 넘어갑니다.
-   - 인식이 잘 안 되면 **`동작했어요`** 버튼으로 직접 통과, **`건너뛰기`** 로 패스할 수 있습니다.
-4. 미션마다 **제한 시간**이 있고, 시간이 다 되면 자동으로 다음 문제로 넘어갑니다.
-5. 5문제를 마치면 **결과 화면**에서 통계를 확인합니다.
+3. 손 모양이 인식되면 **자동으로 다음 문제**로 진행됩니다.
+   - 인식이 어려우면 **`동작했어요`** 로 통과, **`건너뛰기`** 로 패스 (접근성 보장)
+4. 미션마다 **제한 시간**이 있고, 5문제를 마치면 **결과 화면**에서 통계를 확인합니다.
 
 ### 레벨 구성
 
-| 레벨 | 이름 | 내용 | 제한 시간(미션당) | 예시 |
+| 레벨 | 이름 | 내용 | 제한 시간 | 예시 |
 | --- | --- | --- | --- | --- |
 | **Lv.1** | 한 손 기초 | 한 손 간단한 모양 | 10초 | 주먹, 손바닥, 엄지척, OK, 브이 |
-| **Lv.2** | 한 손 심화 | 한 손 복잡한 모양 | 8초 | 전화 모양, 락사인, 손가락 총, 검지 들기, 손하트 |
-| **Lv.3** | 양손 조합 | 양손으로 서로 다른 모양 | 6초 | 주먹+손바닥, 엄지척+브이, OK+검지, 양손 하트 |
+| **Lv.2** | 한 손 심화 | 한 손 복잡한 모양 | 8초 | 전화 모양, 락사인, 손가락 총, 검지, 손하트 |
+| **Lv.3** | 양손 조합 | 양손으로 서로 다른 모양 | 6초 | 주먹+손바닥, 엄지척+브이, OK+검지 |
 
 > 제한 시간은 `max(5, 12 − 레벨×2)` 초로 자동 계산됩니다.
 
 ---
 
-## 🤚 손동작 인식 원리
+## 🤚 손 제스처 인식 방식
 
-별도의 학습된 분류 모델 없이, **MediaPipe가 추정한 손 관절 좌표를 규칙으로 해석**해 제스처를 판별합니다.
+### 1) 규칙 기반 (MediaPipe Hands)
 
-1. **랜드마크 추출** — MediaPipe Hands가 한 손당 21개 관절 좌표를 반환 (최대 2손, 신뢰도 0.65 이상)
-2. **손가락 펴짐 판단** — 손가락 끝이 중간 관절보다 위에 있으면 "펴짐"으로 간주
-3. **거리 기반 판단** — 엄지–검지 끝 거리, 손바닥 크기 비율 등으로 OK·손하트 등을 구분
-4. **제스처 결정** — 펴진 손가락 조합으로 `fist`, `open_palm`, `thumbs_up`, `ok`, `peace`, `call`, `rock`, `point`, `finger_heart` 등을 분류
-5. **양손 조합** — Lv.3은 두 손의 제스처 조합(예: `fist` + `open_palm`)이 모두 잡혀야 정답 처리
+별도 학습 모델 없이, **MediaPipe가 추정한 손 관절 21개 좌표를 규칙으로 해석**해 제스처를 판별합니다. 손가락 펴짐(끝–중간 관절 위치)과 거리(엄지–검지, 손바닥 크기 비율)를 이용해 `fist`, `open_palm`, `thumbs_up`, `ok`, `peace`, `call`, `rock`, `point`, `finger_heart` 등을 분류합니다. 오인식을 줄이기 위해 자동 판정에 **1.2초 쿨다운**을 둡니다.
 
-오인식을 줄이기 위해 정답 자동 판정에는 **1.2초 쿨다운**이 적용됩니다.
+### 2) YOLOv10n (React 버전, 하이브리드)
+
+`frontend-react`는 학습한 **YOLOv10n 모델(stage1, 8클래스)** 을 `onnxruntime-web`으로 **브라우저에서 직접 추론**합니다. 별도 백엔드 없이 클라이언트에서 동작합니다.
+
+- **하이브리드 판정**: YOLO가 잡는 6개 제스처(주먹·손바닥·OK·엄지척·전화·락사인)는 YOLO로, 나머지(브이·손가락 총·손하트·양손 조합)는 MediaPipe 규칙 기반으로 판정합니다.
+- **화면 표시**: 미션 시작 시 1초간 YOLO 박스를 보여준 뒤, MediaPipe 손 관절 랜드마크로 전환합니다.
+
+---
+
+## 🧠 인식 모델 학습 (YOLOv10n)
+
+| 단계 | 데이터 | 클래스 | 가중치 |
+| --- | --- | --- | --- |
+| **stage1** | HaGRID (8클래스) | palm·fist·ok·three·like·call·rock·three2 | `model/hagrid_stage1_8cls_best.pt` |
+| **stage2** | HaGRID + 자체 수집(동양인·고령층) | 동일 | `train/hagrid_stage2_elderly_best.pt` |
+
+- **데이터셋**: HaGRID(`datasets/dataset.yaml`) + 자체 수집 데이터를 Roboflow로 라벨링(`datasets/OSSP-Labeling.coco (1).zip`)
+- **전처리**: `prepare/prepare_hagrid_dataset.py` (HaGRID 다운로드·YOLO 포맷 변환)
+- **학습/내보내기**: `train/`의 노트북에서 학습, `model/export_yolov10_onnx.ipynb`에서 `.pt → .onnx` 변환
+- **비교 실험(ablation)**: HaGRID 단독(stage1) vs 자체 데이터 추가(stage2)로 고령층·동양인 손에 대한 인식 성능을 비교합니다.
+
+> 현재 React 데모에는 stage1(`.onnx`)이 탑재돼 있습니다.
+
+---
+
+## 🚀 실행 방법
+
+손 인식 카메라(`getUserMedia`)는 **보안 컨텍스트(localhost 또는 HTTPS)** 에서만 동작합니다.
+⚠️ VS Code의 내장 미리보기(Simple Browser)는 카메라 접근이 안 되니, **Chrome/Edge 등 실제 브라우저**에서 여세요.
+
+### A. 바닐라 버전 (`frontend/`)
+
+```bash
+cd frontend
+python -m http.server 8000      # 또는: npx serve
+# 브라우저에서 http://localhost:8000/home.html 접속 → 카메라 허용
+```
+
+### B. React 버전 (`frontend-react/`)
+
+```bash
+cd frontend-react
+npm install
+npm run dev
+# 브라우저에서 http://localhost:5173 접속 → 카메라 허용
+```
+
+> 첫 실행 시 onnxruntime-web의 wasm과 모델(약 9MB)을 내려받느라 몇 초 걸릴 수 있습니다.
+> 미션 라벨에 `YOLO ✓`가 뜨면 모델이 준비된 상태입니다.
+
+---
+
+## 🛠 기술 스택
+
+- **프론트엔드**: HTML5 · CSS3 · Vanilla JS / React 18 · Vite · React Router
+- **손 관절 인식**: MediaPipe Hands (CDN)
+- **제스처 검출 모델**: YOLOv10n (Ultralytics) → ONNX (`onnxruntime-web`, 브라우저 추론)
+- **데이터**: HaGRID + 자체 수집 데이터 / Roboflow 라벨링
+- **저장**: Web Storage(`localStorage`) — 선택 레벨·최근 기록
 
 ---
 
@@ -166,32 +161,27 @@ http://localhost:8000/home.html
 | 키 | 내용 |
 | --- | --- |
 | `handSparkLevel` | 마지막으로 선택한 레벨 |
-| `handSparkLastResult` | 최근 게임 결과(레벨, 정답 수, 소요 시간, 평균 반응속도 등) |
+| `handSparkLastResult` | 최근 게임 결과(레벨·정답 수·소요 시간·평균 반응속도 등) |
 
 ---
 
 ## ⚠️ 요구 사항 · 주의점
 
-- **카메라 권한**이 필요하며, **localhost 또는 HTTPS** 환경에서 실행해야 합니다.
-- MediaPipe Hands를 **CDN에서 불러오므로 인터넷 연결**이 필요합니다.
-- 카메라·라이브러리 로드에 실패하면 자동으로 **수동 진행 모드**로 전환됩니다.
-- 데스크톱/모바일의 최신 Chrome 계열 브라우저에서 가장 안정적으로 동작합니다.
+- 카메라 권한이 필요하며 **localhost 또는 HTTPS** 환경에서 실행해야 합니다.
+- MediaPipe·onnxruntime-web을 CDN에서 불러오므로 **인터넷 연결**이 필요합니다.
+- 카메라·모델 로드 실패 시 자동으로 **수동 진행 모드**로 전환됩니다.
+- 최신 Chrome 계열 브라우저에서 가장 안정적으로 동작합니다.
 
 ---
 
-## 🧭 향후 계획
+## 👥 팀 HandSpark
 
-현재 저장소는 **프론트엔드 프로토타입** 범위입니다. 다음 방향으로 확장할 수 있습니다.
-
-- 규칙 기반 분류 → **학습 기반 손 제스처 인식 모델**(예: YOLO 계열) 로 고도화
-- 노인·다양한 환경(조명 변화, 손 떨림, 손 겹침) 데이터로 인식 강건성 강화
-- 기록 누적·추세 분석 등 **장기 인지훈련 트래킹** 기능
-- 백엔드 연동을 통한 사용자별 기록 동기화
+| 역할 | 이름 | 담당 |
+| --- | --- | --- |
+| 팀장 | 안서희 (2414784) | AI 모델 · 데이터 수집/라벨링 |
+| 팀원 | 김리원 (2415145) | 프론트엔드 · UI |
+| 팀원 | 박현아 (2413151) | 게임 로직 · 기획 · 통합 |
 
 ---
 
-<div align="center">
-
-**Hand Spark** · 손을 움직여 뇌를 깨우는 인지훈련 게임 🧠
-
-</div>
+**HandSpark** · 손을 움직여 뇌를 깨우는 인지훈련 게임 🧠
