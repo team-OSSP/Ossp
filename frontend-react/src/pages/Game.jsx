@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "../components/Layout.jsx";
 import { useMediaPipeHands } from "../hooks/useMediaPipeHands.js";
-import { missionSets } from "../data/missions.js";
+import { generateMissions } from "../data/missions.js";
 import { isExpectedGesture } from "../lib/gestures.js";
 import { loadYolo, runYolo, YOLO_TO_GESTURE } from "../lib/yolo.js";
 
-// YOLO(stage1 8클래스)가 판별 가능한 미션 제스처
-const YOLO_GESTURES = new Set(["open_palm", "fist", "ok", "thumbs_up", "call", "rock"]);
+const YOLO_GESTURES = new Set([
+  "open_palm", "fist", "ok", "thumbs_up", "call", "rock", "three", "three2",
+  "palm_fist", "ok_palm", "like_call", "three2_like", "three_rock", "call_ok", "rock_fist",
+]);
 
 export default function Game() {
   const navigate = useNavigate();
@@ -17,8 +19,8 @@ export default function Game() {
     Number(localStorage.getItem("handSparkLevel")) ||
     2;
 
-  const missions = missionSets[level] || missionSets[2];
-  const roundSeconds = Math.max(5, 12 - level * 2);
+  const [missions] = useState(() => generateMissions(level));
+  const roundSeconds = 10;
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -31,11 +33,13 @@ export default function Game() {
   const [started, setStarted] = useState(false);
   const [phase, setPhase] = useState("landmark");
   const [yoloReady, setYoloReady] = useState(false);
+  const [feedback, setFeedback] = useState(null); // null | "success" | "fail"
 
   // 콜백/루프에서 참조할 로직 state (stale closure 방지)
   const indexRef = useRef(0);
   const scoreRef = useRef(0);
   const finishedRef = useRef(false);
+  const transitioningRef = useRef(false);
   const lastAutoMatchRef = useRef(0);
   const roundStartedAtRef = useRef(Date.now());
   const reactionTimesRef = useRef([]);
@@ -64,18 +68,24 @@ export default function Game() {
 
   const markMission = useCallback(
     (isCorrect) => {
-      if (finishedRef.current) return;
+      if (finishedRef.current || transitioningRef.current) return;
+      transitioningRef.current = true;
       if (isCorrect) {
         scoreRef.current += 1;
         setScore(scoreRef.current);
         reactionTimesRef.current.push((Date.now() - roundStartedAtRef.current) / 1000);
       }
-      const next = indexRef.current + 1;
-      if (next >= missions.length) { finishGame(); return; }
-      indexRef.current = next;
-      setIndex(next);
-      setRemaining(roundSeconds);
-      roundStartedAtRef.current = Date.now();
+      setFeedback(isCorrect ? "success" : "fail");
+      setTimeout(() => {
+        setFeedback(null);
+        transitioningRef.current = false;
+        const next = indexRef.current + 1;
+        if (next >= missions.length) { finishGame(); return; }
+        indexRef.current = next;
+        setIndex(next);
+        setRemaining(roundSeconds);
+        roundStartedAtRef.current = Date.now();
+      }, 1000);
     },
     [missions.length, roundSeconds, finishGame]
   );
@@ -84,7 +94,7 @@ export default function Game() {
   // 공통 판별 (1.2초 쿨다운)
   const judge = useCallback(
     (gestures) => {
-      if (finishedRef.current) return;
+      if (finishedRef.current || transitioningRef.current) return;
       const m = missions[indexRef.current];
       const expected = m && m.gesture;
       if (
@@ -177,21 +187,40 @@ export default function Game() {
       return { cw, ch, vw, vh, scale, px: (x) => x * scale - ox, py: (y) => y * scale - oy };
     }
 
+    const HAND_CONNECTIONS = [
+      [0,1],[1,2],[2,3],[3,4],
+      [0,5],[5,6],[6,7],[7,8],
+      [0,9],[9,10],[10,11],[11,12],
+      [0,13],[13,14],[14,15],[15,16],
+      [0,17],[17,18],[18,19],[19,20],
+      [5,9],[9,13],[13,17],[17,0],
+    ];
+
     function drawLandmarks() {
       const M = cover();
       ctx.clearRect(0, 0, M.cw, M.ch);
-      ctx.fillStyle = "#D32F2F";
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2;
-      mpLandmarksRef.current.forEach((lm) =>
-        lm.forEach((p) => {
-          const x = M.px(p.x * M.vw), y = M.py(p.y * M.vh);
+      mpLandmarksRef.current.forEach((lm) => {
+        const pts = lm.map((p) => ({ x: M.px(p.x * M.vw), y: M.py(p.y * M.vh) }));
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        HAND_CONNECTIONS.forEach(([a, b]) => {
+          ctx.beginPath();
+          ctx.moveTo(pts[a].x, pts[a].y);
+          ctx.lineTo(pts[b].x, pts[b].y);
+          ctx.stroke();
+        });
+
+        ctx.fillStyle = "#D32F2F";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        pts.forEach(({ x, y }) => {
           ctx.beginPath();
           ctx.arc(x, y, 5, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
-        })
-      );
+        });
+      });
     }
 
     function drawBoxes() {
@@ -269,15 +298,11 @@ export default function Game() {
               카메라 연결 전
             </p>
           )}
-        </section>
-
-        <section className="game-actions">
-          <button className="game-action-btn correct" onClick={() => markMission(true)}>
-            동작했어요
-          </button>
-          <button className="game-action-btn skip" onClick={() => markMission(false)}>
-            건너뛰기
-          </button>
+          {feedback && (
+            <div className={`feedback-overlay ${feedback}`}>
+              {feedback === "success" ? "✅ 성공!" : "❌ 실패"}
+            </div>
+          )}
         </section>
       </main>
 

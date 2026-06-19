@@ -38,9 +38,12 @@ export function classifyHand(points) {
 }
 
 export function isExpectedGesture(expected, gestures) {
-  if (expected === "two_hands") return gestures.length >= 2;
-  if (expected === "fist_open") return gestures.includes("fist") && gestures.includes("open_palm");
-  if (expected === "thumbs_peace") return gestures.includes("thumbs_up") && gestures.includes("peace");
-  if (expected === "ok_point") return gestures.includes("ok") && gestures.includes("point");
+  if (expected === "palm_fist")   return gestures.includes("open_palm") && gestures.includes("fist");
+  if (expected === "ok_palm")     return gestures.includes("ok")        && gestures.includes("open_palm");
+  if (expected === "like_call")   return gestures.includes("thumbs_up") && gestures.includes("call");
+  if (expected === "three2_like") return gestures.includes("three2")    && gestures.includes("thumbs_up");
+  if (expected === "three_rock")  return gestures.includes("three")     && gestures.includes("rock");
+  if (expected === "call_ok")     return gestures.includes("call")      && gestures.includes("ok");
+  if (expected === "rock_fist")   return gestures.includes("rock")      && gestures.includes("fist");
   return gestures.includes(expected);
 }

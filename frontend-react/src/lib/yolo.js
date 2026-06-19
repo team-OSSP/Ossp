@@ -8,13 +8,14 @@ export const YOLO_NAMES = ["palm", "fist", "ok", "three", "like", "call", "rock"
 
 // YOLO 클래스 -> 게임 미션 제스처 이름 (게임이 실제로 쓰는 6개만 매핑)
 export const YOLO_TO_GESTURE = {
-  palm: "open_palm",
-  fist: "fist",
-  ok: "ok",
-  like: "thumbs_up",
-  call: "call",
-  rock: "rock",
-  // three, three2 는 현재 미션에 없어 매핑하지 않음
+  palm:   "open_palm",
+  fist:   "fist",
+  ok:     "ok",
+  like:   "thumbs_up",
+  call:   "call",
+  rock:   "rock",
+  three:  "three",
+  three2: "three2",
 };
 
 const SIZE = 640;
