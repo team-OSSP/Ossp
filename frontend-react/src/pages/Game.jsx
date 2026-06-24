@@ -135,7 +135,7 @@ export default function Game() {
   // YOLO 모델 로드
   useEffect(() => {
     let alive = true;
-    loadYolo("/hagrid_stage1_8cls.onnx")
+    loadYolo(params.get("model") === "2" ? "/hagrid_stage2_8cls2.onnx" : "/hagrid_stage1_8cls.onnx")
       .then(() => { if (alive) setYoloReady(true); })
       .catch((e) => { console.error("YOLO 모델 로드 실패:", e); });
     return () => { alive = false; };
