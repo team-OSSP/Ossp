@@ -14,7 +14,7 @@ const comboInfo = {
   ok_palm:     { emoji: "👌🖐️", text: "OK + 손바닥",            gesture: "ok_palm"     },
   like_call:   { emoji: "👍🤙", text: "엄지척 + 전화",          gesture: "like_call"   },
   three2_like: { emoji: "✌️👍", text: "세 손가락(2) + 엄지척",  gesture: "three2_like" },
-  three_rock:  { emoji: "🖖🤟", text: "세 손가락(1) + 락사인",  gesture: "three_rock"  },
+  three_rock:  { emoji: "3️⃣🤟", text: "세 손가락(1) + 락사인",  gesture: "three_rock"  },
   call_ok:     { emoji: "🤙👌", text: "전화 + OK",              gesture: "call_ok"     },
   rock_fist:   { emoji: "🤟👊", text: "락사인 + 주먹",          gesture: "rock_fist"   },
 };
@@ -22,7 +22,7 @@ const comboInfo = {
 const POOLS = {
   1: ["palm", "three", "like", "fist"],
   2: ["ok", "rock", "three2", "call"],
-  3: ["palm_fist", "ok_palm", "like_call", "three2_like", "three_rock", "call_ok", "rock_fist"],
+  3: ["palm_fist", "ok_palm", "like_call", "three_rock", "call_ok", "rock_fist"],
 };
 
 function pick(pool, n) {

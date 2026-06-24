@@ -6,11 +6,6 @@ import { generateMissions } from "../data/missions.js";
 import { isExpectedGesture } from "../lib/gestures.js";
 import { loadYolo, runYolo, YOLO_TO_GESTURE } from "../lib/yolo.js";
 
-const YOLO_GESTURES = new Set([
-  "open_palm", "fist", "ok", "thumbs_up", "call", "rock", "three", "three2",
-  "palm_fist", "ok_palm", "like_call", "three2_like", "three_rock", "call_ok", "rock_fist",
-]);
-
 export default function Game() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -110,19 +105,13 @@ export default function Game() {
     [missions]
   );
 
-  // MediaPipe 결과: 랜드마크 저장 + (YOLO가 못 잡는 미션은) 규칙 기반으로 판별
+  // MediaPipe 결과: 랜드마크 저장 (판별은 YOLO가 담당)
   const onResults = useCallback(
-    ({ gestures, landmarks }) => {
+    ({ landmarks }) => {
       mpLandmarksRef.current = landmarks;
       setStarted(true);
-      const m = missions[indexRef.current];
-      const expected = m && m.gesture;
-      if (expected && !YOLO_GESTURES.has(expected)) {
-        if (gestures.length) setStatus("인식: " + gestures.join(", "));
-        judge(gestures);
-      }
     },
-    [missions, judge]
+    []
   );
 
   const onStatus = useCallback((t) => {
@@ -243,13 +232,9 @@ export default function Game() {
         runYolo(video)
           .then((dets) => {
             yoloDetsRef.current = dets;
-            const m = missions[indexRef.current];
-            const expected = m && m.gesture;
-            if (expected && YOLO_GESTURES.has(expected)) {
-              const g = dets.map((d) => YOLO_TO_GESTURE[d.name]).filter(Boolean);
-              if (g.length) setStatus("YOLO 인식: " + g.join(", "));
-              judge(g);
-            }
+            const g = dets.map((d) => YOLO_TO_GESTURE[d.name]).filter(Boolean);
+            if (g.length) setStatus("YOLO 인식: " + g.join(", "));
+            judge(g);
           })
           .catch(() => {})
           .finally(() => { busy = false; });
